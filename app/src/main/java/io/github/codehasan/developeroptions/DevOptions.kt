@@ -7,7 +7,7 @@ import android.widget.Toast
 
 /** Returns true if Developer options is turned on for this device. */
 fun isDeveloperOptionsEnabled(context: Context): Boolean {
-    return Settings.Secure.getInt(
+    return Settings.Global.getInt(
         context.contentResolver,
         Settings.Global.DEVELOPMENT_SETTINGS_ENABLED,
         0
