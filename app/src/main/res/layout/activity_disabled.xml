@@ -11,6 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="32dp"
         android:gravity="center"
+        android:letterSpacing="0.01"
         android:text="@string/disabled_title"
         android:textColor="@color/text_title"
         android:textSize="28sp"
