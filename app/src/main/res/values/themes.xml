@@ -1,0 +1,11 @@
+<resources>
+
+    <style name="Theme.DeveloperOptions" parent="Theme.Material3.DayNight.NoActionBar" />
+
+    <!-- Transparent theme for the launcher trampoline so it shows no flash. -->
+    <style name="Theme.Trampoline" parent="Theme.DeveloperOptions">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+</resources>
