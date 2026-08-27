@@ -12,6 +12,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:text="@string/disabled_title"
+        android:textColor="@color/text_title"
         android:textSize="28sp"
         android:textStyle="bold" />
 
@@ -21,6 +22,7 @@
         android:layout_marginTop="16dp"
         android:gravity="center"
         android:text="@string/disabled_message"
+        android:textColor="@color/text_subtitle"
         android:textSize="18sp" />
 
     <Button
@@ -28,9 +30,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="48dp"
+        android:paddingVertical="16dp"
         android:paddingStart="48dp"
         android:paddingEnd="48dp"
         android:text="@string/start"
+        android:textAllCaps="false"
         android:textSize="22sp" />
 
 </LinearLayout>

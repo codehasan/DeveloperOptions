@@ -1,0 +1,6 @@
+<resources>
+    <color name="window_background">#000000</color>
+    <color name="accent">#8AB4F8</color>
+    <color name="text_title">#FFFFFF</color>
+    <color name="text_subtitle">#BDC1C6</color>
+</resources>
