@@ -1,6 +1,9 @@
 <resources>
 
-    <style name="Theme.DeveloperOptions" parent="Theme.Material3.DayNight.NoActionBar" />
+    <style name="Theme.DeveloperOptions" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:fontFamily">@font/product_sans_regular</item>
+        <item name="fontFamily">@font/product_sans_regular</item>
+    </style>
 
     <!-- Transparent theme for the launcher trampoline so it shows no flash. -->
     <style name="Theme.Trampoline" parent="Theme.DeveloperOptions">
