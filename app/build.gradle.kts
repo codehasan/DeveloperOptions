@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "io.github.codehasan.developeroptions"
-        minSdk = 24
+        minSdk = 26
         //noinspection OldTargetApi
         targetSdk = 36
         versionCode = 1001
