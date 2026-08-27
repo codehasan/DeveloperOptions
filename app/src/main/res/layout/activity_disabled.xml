@@ -4,12 +4,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
-    android:orientation="vertical"
-    android:padding="32dp">
+    android:orientation="vertical">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="32dp"
         android:gravity="center"
         android:text="@string/disabled_title"
         android:textColor="@color/text_title"
@@ -19,6 +19,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="32dp"
         android:layout_marginTop="16dp"
         android:gravity="center"
         android:text="@string/disabled_message"
@@ -29,6 +30,7 @@
         android:id="@+id/startButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="32dp"
         android:layout_marginTop="48dp"
         android:paddingVertical="16dp"
         android:paddingStart="48dp"
