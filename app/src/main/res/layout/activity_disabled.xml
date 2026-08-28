@@ -1,44 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/titleText"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:layout_marginHorizontal="32dp"
         android:gravity="center"
-        android:letterSpacing="0.01"
-        android:text="@string/disabled_title"
-        android:textColor="@color/text_title"
-        android:textSize="26sp"
-        android:textStyle="bold" />
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/titleText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:letterSpacing="0.01"
+            android:text="@string/disabled_title"
+            android:textColor="@color/text_title"
+            android:textSize="26sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:gravity="center"
+            android:text="@string/disabled_message"
+            android:textColor="@color/text_subtitle"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/startButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="48dp"
+            android:paddingHorizontal="48dp"
+            android:paddingVertical="16dp"
+            android:text="@string/start"
+            android:textAllCaps="false"
+            android:textSize="20sp" />
+
+    </LinearLayout>
 
     <TextView
+        android:id="@+id/deviceText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
         android:layout_marginHorizontal="32dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginBottom="24dp"
         android:gravity="center"
-        android:text="@string/disabled_message"
+        android:letterSpacing="0.02"
         android:textColor="@color/text_subtitle"
-        android:textSize="18sp" />
+        android:textSize="14sp"
+        tools:text="Xiaomi Redmi Note 12" />
 
-    <Button
-        android:id="@+id/startButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="32dp"
-        android:layout_marginTop="48dp"
-        android:paddingVertical="16dp"
-        android:paddingStart="48dp"
-        android:paddingEnd="48dp"
-        android:text="@string/start"
-        android:textAllCaps="false"
-        android:textSize="22sp" />
-
-</LinearLayout>
+</FrameLayout>

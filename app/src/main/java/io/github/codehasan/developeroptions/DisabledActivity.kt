@@ -1,5 +1,6 @@
 package io.github.codehasan.developeroptions
 
+import android.os.Build
 import android.os.Bundle
 import android.text.Annotation
 import android.text.Spannable
@@ -27,6 +28,8 @@ class DisabledActivity : AppCompatActivity() {
 
         findViewById<TextView>(R.id.titleText).text = buildTitleWithColoredAnnotations()
 
+        findViewById<TextView>(R.id.deviceText).text = deviceName()
+
         findViewById<Button>(R.id.startButton).setOnClickListener {
             openAboutPhone(this)
         }
@@ -39,7 +42,8 @@ class DisabledActivity : AppCompatActivity() {
     private fun buildTitleWithColoredAnnotations(): CharSequence {
         // A string without markup comes back as a plain String, not SpannedString
         // (e.g. a translation that drops the <annotation> tag) — fall back safely.
-        val title = getText(R.string.disabled_title) as? SpannedString ?: return getText(R.string.disabled_title)
+        val title = getText(R.string.disabled_title) as? SpannedString
+            ?: return getText(R.string.disabled_title)
         val builder = SpannableStringBuilder(title)
         for (annotation in title.getSpans(0, title.length, Annotation::class.java)) {
             if (annotation.key == "color" && annotation.value == "error") {
@@ -52,6 +56,22 @@ class DisabledActivity : AppCompatActivity() {
             }
         }
         return builder
+    }
+
+    /**
+     * A human-readable name for the current device, e.g. "Google Pixel 7".
+     * MODEL sometimes already starts with the manufacturer (some brands set it
+     * that way), so we avoid repeating it — and capitalize the manufacturer,
+     * which Build.MANUFACTURER often reports lower-case (e.g. "samsung").
+     */
+    private fun deviceName(): String {
+        val manufacturer = Build.MANUFACTURER?.trim().orEmpty()
+        val model = Build.MODEL?.trim().orEmpty()
+        return when {
+            model.startsWith(manufacturer, ignoreCase = true) -> model
+            manufacturer.isEmpty() -> model
+            else -> "${manufacturer.replaceFirstChar { it.uppercase() }} $model"
+        }.trim()
     }
 
     override fun onResume() {
