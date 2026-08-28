@@ -14,7 +14,7 @@
         android:letterSpacing="0.01"
         android:text="@string/disabled_title"
         android:textColor="@color/text_title"
-        android:textSize="28sp"
+        android:textSize="26sp"
         android:textStyle="bold" />
 
     <TextView
