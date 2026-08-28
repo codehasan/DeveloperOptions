@@ -3,4 +3,5 @@
     <color name="accent">#8AB4F8</color>
     <color name="text_title">#FFFFFF</color>
     <color name="text_subtitle">#BDC1C6</color>
+    <color name="text_error">#F28B82</color>
 </resources>
