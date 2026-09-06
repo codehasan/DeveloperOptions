@@ -5,35 +5,29 @@ import android.content.Intent
 import android.provider.Settings
 import android.widget.Toast
 
-/** Returns true if Developer options is turned on for this device. */
-fun isDeveloperOptionsEnabled(context: Context): Boolean {
-    return Settings.Global.getInt(
+// True if Developer options is actually toggled on. This is the real state, not
+// "reachable": on Vivo/FuntouchOS the build-number taps only make the screen
+// reachable, and this flag stays off until the user toggles it there by hand.
+fun isDeveloperOptionsEnabled(context: Context): Boolean =
+    Settings.Global.getInt(
         context.contentResolver,
         Settings.Global.DEVELOPMENT_SETTINGS_ENABLED,
         0
     ) != 0
-}
 
 /**
- * Tries to open the system Developer options screen.
+ * Opens the system Developer options screen; returns true if it launched.
  *
- * Returns true only if that screen actually launched, false if no attempt could
- * resolve it.
- *
- * The normal path is an implicit intent, which works on stock Android. But on
- * some OEM builds (seen on Transsion/HiOS, Android 16) the DEVELOPMENT_SETTINGS_ENABLED
- * flag flips and the screen's component is enabled, yet Settings hasn't committed
- * its intent-filter into PackageManager's resolver until the Settings process next
- * runs — so the implicit intent throws ActivityNotFoundException even though the
- * screen is ready. In that window we fall back to launching the (already enabled)
- * Settings activity explicitly by class name, which bypasses intent resolution.
+ * The implicit intent is correct on stock Android. But on some OEM builds
+ * (seen on Transsion/HiOS, Android 16) Settings enables the screen's component
+ * before committing its intent-filter to PackageManager's resolver, so the
+ * implicit intent throws ActivityNotFoundException even though the screen is
+ * ready. The explicit fallback launches it by class name, bypassing resolution.
  */
 fun openDeveloperOptions(context: Context): Boolean {
-    // 1. Implicit intent: correct on stock Android and once the resolver is fresh.
     if (tryStart(context, Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS))) {
         return true
     }
-    // 2. Explicit fallback for OEM builds whose resolver lags behind the flag.
     for (activity in DEV_OPTIONS_ACTIVITIES) {
         val explicit = Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
             .setClassName(SETTINGS_PACKAGE, activity)
@@ -42,11 +36,7 @@ fun openDeveloperOptions(context: Context): Boolean {
     return false
 }
 
-/**
- * Opens the top-level Settings app as a last-resort fallback, for when the
- * Developer options screen itself won't launch (e.g. an OEM build where its
- * activity isn't exported). Returns true if Settings opened.
- */
+/** Last-resort fallback for when the Developer options screen won't launch. */
 fun openSettings(context: Context): Boolean =
     tryStart(context, Intent(Settings.ACTION_SETTINGS))
 
@@ -59,15 +49,11 @@ private fun tryStart(context: Context, intent: Intent): Boolean = try {
 
 private const val SETTINGS_PACKAGE = "com.android.settings"
 
-/** Known class names for the Developer options screen across Android builds. */
 private val DEV_OPTIONS_ACTIVITIES = listOf(
-    // AOSP / Pixel and most recent builds.
-    "com.android.settings.Settings\$DevelopmentSettingsDashboardActivity",
-    // Older AOSP and some OEM skins (e.g. Transsion/HiOS).
-    "com.android.settings.Settings\$DevelopmentSettingsActivity",
+    "com.android.settings.Settings\$DevelopmentSettingsDashboardActivity", // AOSP/Pixel, recent builds
+    "com.android.settings.Settings\$DevelopmentSettingsActivity",          // older AOSP, some OEM skins
 )
 
-/** Opens the "About phone" screen so the user can tap the build number 7 times. */
 fun openAboutPhone(context: Context) {
     val intent = Intent(Settings.ACTION_DEVICE_INFO_SETTINGS)
     startSettings(context, intent, Settings.ACTION_SETTINGS)

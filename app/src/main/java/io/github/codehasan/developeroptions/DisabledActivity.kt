@@ -29,21 +29,16 @@ class DisabledActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.deviceText).text = deviceName()
 
         findViewById<Button>(R.id.startButton).setOnClickListener {
-            // The button adapts to the current state. If Developer options is
-            // already on (we're only still here because its screen wouldn't open),
-            // retry opening it; otherwise send the user to About phone to turn it on.
-            if (isDeveloperOptionsEnabled(this)) {
-                // Try the Developer options screen; if it won't open on this
-                // build, fall back to the main Settings app so the user can
-                // still get there manually.
-                if (openDeveloperOptions(this) || openSettings(this)) finish()
-            } else {
-                openAboutPhone(this)
+            when {
+                openDeveloperOptions(this) -> finish()
+                // Enabled but the screen won't open on this OEM — Settings home instead.
+                isDeveloperOptionsEnabled(this) -> if (openSettings(this)) finish()
+                // Not enabled and not reachable — send them to tap the build number.
+                else -> openAboutPhone(this)
             }
         }
     }
 
-    /** Points the title, message and button at the copy for the current state. */
     private fun updateUiForState() {
         val enabled = isDeveloperOptionsEnabled(this)
         findViewById<TextView>(R.id.titleText).text =
@@ -54,13 +49,9 @@ class DisabledActivity : AppCompatActivity() {
             getText(if (enabled) R.string.open_dev_options else R.string.start)
     }
 
-    /**
-     * Reads a string resource as markup and turns each <annotation color="..."> span
-     * into a theme-aware colored span ("error" -> red, "success" -> green).
-     */
+    /** Turns each <annotation color="error|success"> span into a theme-aware colored span. */
     private fun coloredAnnotations(resId: Int): CharSequence {
-        // A string without markup comes back as a plain String, not SpannedString
-        // (e.g. a translation that drops the <annotation> tag) — fall back safely.
+        // Markup-free strings (e.g. a translation dropping the tag) aren't SpannedString.
         val text = getText(resId) as? SpannedString ?: return getText(resId)
         val builder = SpannableStringBuilder(text)
         for (annotation in text.getSpans(0, text.length, Annotation::class.java)) {
@@ -80,12 +71,8 @@ class DisabledActivity : AppCompatActivity() {
         return builder
     }
 
-    /**
-     * A human-readable name for the current device, e.g. "Google Pixel 7".
-     * MODEL sometimes already starts with the manufacturer (some brands set it
-     * that way), so we avoid repeating it — and capitalize the manufacturer,
-     * which Build.MANUFACTURER often reports lower-case (e.g. "samsung").
-     */
+    // e.g. "Google Pixel 7". MODEL sometimes already includes the manufacturer, so
+    // avoid repeating it; MANUFACTURER is often lower-case (e.g. "samsung").
     private fun deviceName(): String {
         val manufacturer = Build.MANUFACTURER?.trim().orEmpty()
         val model = Build.MODEL?.trim().orEmpty()
@@ -98,12 +85,9 @@ class DisabledActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        // Runs every time this screen becomes visible again, including when the
-        // user presses back to close the About phone page after tapping the build
-        // number. If Developer options is now on and its screen opens, we're done.
-        // Otherwise stay put (doing nothing else) and just reflect the current
-        // state in the UI — the user drives the next step via the button.
-        if (isDeveloperOptionsEnabled(this) && openDeveloperOptions(this)) {
+        // Fires when returning from About phone. Once the screen is reachable
+        // (Vivo: after the taps, before the toggle), opening it takes over.
+        if (openDeveloperOptions(this)) {
             finish()
             return
         }
