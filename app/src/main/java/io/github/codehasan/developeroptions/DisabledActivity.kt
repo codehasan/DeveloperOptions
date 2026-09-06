@@ -2,6 +2,8 @@ package io.github.codehasan.developeroptions
 
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Annotation
 import android.text.Spannable
 import android.text.SpannableStringBuilder
@@ -16,6 +18,9 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
 class DisabledActivity : AppCompatActivity() {
+    private val retryHandler = Handler(Looper.getMainLooper())
+    private var openAttempts = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -81,8 +86,39 @@ class DisabledActivity : AppCompatActivity() {
         // if Developer options is now enabled, jump straight to it; otherwise
         // stay on this screen so the user can try again.
         if (isDeveloperOptionsEnabled(this)) {
-            openDeveloperOptions(this)
+            openAttempts = 0
+            attemptOpenDeveloperOptions()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // Stop retrying while we're not on screen (e.g. once the settings screen
+        // has opened, or the user left).
+        retryHandler.removeCallbacksAndMessages(null)
+    }
+
+    /**
+     * Developer options can read as enabled a moment before the system registers
+     * its settings screen, so a single launch attempt right after the user flips
+     * it on often finds no activity to handle the intent. Retry a few times over
+     * ~2s before giving up and opening the top-level Settings as a last resort.
+     */
+    private fun attemptOpenDeveloperOptions() {
+        if (openDeveloperOptions(this)) {
+            finish()
+            return
+        }
+        if (openAttempts++ < MAX_OPEN_ATTEMPTS) {
+            retryHandler.postDelayed(::attemptOpenDeveloperOptions, RETRY_DELAY_MS)
+        } else {
+            openSettings(this)
             finish()
         }
+    }
+
+    companion object {
+        private const val MAX_OPEN_ATTEMPTS = 10
+        private const val RETRY_DELAY_MS = 200L
     }
 }
