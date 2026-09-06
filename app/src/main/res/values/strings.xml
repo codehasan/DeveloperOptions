@@ -3,5 +3,8 @@
     <string name="disabled_title">Developer Options is <annotation color="error">OFF</annotation></string>
     <string name="disabled_message">Tap Start, then tap "Build number" 7 times to turn it on. Then press back.</string>
     <string name="start">Start</string>
+    <string name="enabled_title">Developer Options is <annotation color="success">ON</annotation></string>
+    <string name="enabled_message">It couldn\'t be opened automatically. Tap the button to open it.</string>
+    <string name="open_dev_options">Open</string>
     <string name="cannot_open_settings">Failed to open Settings</string>
 </resources>

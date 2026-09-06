@@ -4,4 +4,5 @@
     <color name="text_title">#1A1A1A</color>
     <color name="text_subtitle">#5F6368</color>
     <color name="text_error">#D93025</color>
+    <color name="text_success">#1E8E3E</color>
 </resources>

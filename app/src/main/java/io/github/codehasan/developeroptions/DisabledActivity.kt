@@ -2,8 +2,6 @@ package io.github.codehasan.developeroptions
 
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.text.Annotation
 import android.text.Spannable
 import android.text.SpannableStringBuilder
@@ -18,9 +16,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
 class DisabledActivity : AppCompatActivity() {
-    private val retryHandler = Handler(Looper.getMainLooper())
-    private var openAttempts = 0
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -31,34 +26,53 @@ class DisabledActivity : AppCompatActivity() {
             insets
         }
 
-        findViewById<TextView>(R.id.titleText).text = buildTitleWithColoredAnnotations()
-
         findViewById<TextView>(R.id.deviceText).text = deviceName()
 
         findViewById<Button>(R.id.startButton).setOnClickListener {
-            openAboutPhone(this)
+            // The button adapts to the current state. If Developer options is
+            // already on (we're only still here because its screen wouldn't open),
+            // retry opening it; otherwise send the user to About phone to turn it on.
+            if (isDeveloperOptionsEnabled(this)) {
+                if (openDeveloperOptions(this)) finish()
+            } else {
+                openAboutPhone(this)
+            }
         }
     }
 
+    /** Points the title, message and button at the copy for the current state. */
+    private fun updateUiForState() {
+        val enabled = isDeveloperOptionsEnabled(this)
+        findViewById<TextView>(R.id.titleText).text =
+            coloredAnnotations(if (enabled) R.string.enabled_title else R.string.disabled_title)
+        findViewById<TextView>(R.id.messageText).text =
+            getText(if (enabled) R.string.enabled_message else R.string.disabled_message)
+        findViewById<Button>(R.id.startButton).text =
+            getText(if (enabled) R.string.open_dev_options else R.string.start)
+    }
+
     /**
-     * Reads the disabled_title string as markup and turns each
-     * <annotation color="error"> span into a theme-aware colored span.
+     * Reads a string resource as markup and turns each <annotation color="..."> span
+     * into a theme-aware colored span ("error" -> red, "success" -> green).
      */
-    private fun buildTitleWithColoredAnnotations(): CharSequence {
+    private fun coloredAnnotations(resId: Int): CharSequence {
         // A string without markup comes back as a plain String, not SpannedString
         // (e.g. a translation that drops the <annotation> tag) — fall back safely.
-        val title = getText(R.string.disabled_title) as? SpannedString
-            ?: return getText(R.string.disabled_title)
-        val builder = SpannableStringBuilder(title)
-        for (annotation in title.getSpans(0, title.length, Annotation::class.java)) {
-            if (annotation.key == "color" && annotation.value == "error") {
-                builder.setSpan(
-                    ForegroundColorSpan(ContextCompat.getColor(this, R.color.text_error)),
-                    title.getSpanStart(annotation),
-                    title.getSpanEnd(annotation),
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
+        val text = getText(resId) as? SpannedString ?: return getText(resId)
+        val builder = SpannableStringBuilder(text)
+        for (annotation in text.getSpans(0, text.length, Annotation::class.java)) {
+            if (annotation.key != "color") continue
+            val color = when (annotation.value) {
+                "error" -> R.color.text_error
+                "success" -> R.color.text_success
+                else -> continue
             }
+            builder.setSpan(
+                ForegroundColorSpan(ContextCompat.getColor(this, color)),
+                text.getSpanStart(annotation),
+                text.getSpanEnd(annotation),
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
         }
         return builder
     }
@@ -82,43 +96,14 @@ class DisabledActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         // Runs every time this screen becomes visible again, including when the
-        // user presses back to close the About phone page. Re-run the check:
-        // if Developer options is now enabled, jump straight to it; otherwise
-        // stay on this screen so the user can try again.
-        if (isDeveloperOptionsEnabled(this)) {
-            openAttempts = 0
-            attemptOpenDeveloperOptions()
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        // Stop retrying while we're not on screen (e.g. once the settings screen
-        // has opened, or the user left).
-        retryHandler.removeCallbacksAndMessages(null)
-    }
-
-    /**
-     * Developer options can read as enabled a moment before the system registers
-     * its settings screen, so a single launch attempt right after the user flips
-     * it on often finds no activity to handle the intent. Retry a few times over
-     * ~2s before giving up and opening the top-level Settings as a last resort.
-     */
-    private fun attemptOpenDeveloperOptions() {
-        if (openDeveloperOptions(this)) {
+        // user presses back to close the About phone page after tapping the build
+        // number. If Developer options is now on and its screen opens, we're done.
+        // Otherwise stay put (doing nothing else) and just reflect the current
+        // state in the UI — the user drives the next step via the button.
+        if (isDeveloperOptionsEnabled(this) && openDeveloperOptions(this)) {
             finish()
             return
         }
-        if (openAttempts++ < MAX_OPEN_ATTEMPTS) {
-            retryHandler.postDelayed(::attemptOpenDeveloperOptions, RETRY_DELAY_MS)
-        } else {
-            openSettings(this)
-            finish()
-        }
-    }
-
-    companion object {
-        private const val MAX_OPEN_ATTEMPTS = 10
-        private const val RETRY_DELAY_MS = 200L
+        updateUiForState()
     }
 }
