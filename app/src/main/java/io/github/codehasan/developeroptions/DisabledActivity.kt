@@ -29,12 +29,10 @@ class DisabledActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.deviceText).text = deviceName()
 
         findViewById<Button>(R.id.startButton).setOnClickListener {
-            when {
-                openDeveloperOptions(this) -> finish()
-                // Enabled but the screen won't open on this OEM — Settings home instead.
-                isDeveloperOptionsEnabled(this) -> if (openSettings(this)) finish()
-                // Not enabled and not reachable — send them to tap the build number.
-                else -> openAboutPhone(this)
+            if (isDeveloperOptionsEnabled(this)) {
+                if (openDeveloperOptions(this) || openSettings(this)) finish()
+            } else {
+                openAboutPhone(this)
             }
         }
     }
@@ -87,7 +85,7 @@ class DisabledActivity : AppCompatActivity() {
         super.onResume()
         // Fires when returning from About phone. Once the screen is reachable
         // (Vivo: after the taps, before the toggle), opening it takes over.
-        if (openDeveloperOptions(this)) {
+        if (isDeveloperOptionsEnabled(this) && openDeveloperOptions(this)) {
             finish()
             return
         }

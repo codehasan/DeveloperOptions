@@ -10,7 +10,7 @@ class MainActivity : AppCompatActivity() {
 
         // Opening succeeds when the screen is reachable (enabled on stock, or just
         // reachable-but-off on Vivo — either way, take the user there).
-        if (!openDeveloperOptions(this)) {
+        if (!isDeveloperOptionsEnabled(this) || !openDeveloperOptions(this)) {
             startActivity(Intent(this, DisabledActivity::class.java))
         }
         finish()
