@@ -42,6 +42,14 @@ fun openDeveloperOptions(context: Context): Boolean {
     return false
 }
 
+/**
+ * Opens the top-level Settings app as a last-resort fallback, for when the
+ * Developer options screen itself won't launch (e.g. an OEM build where its
+ * activity isn't exported). Returns true if Settings opened.
+ */
+fun openSettings(context: Context): Boolean =
+    tryStart(context, Intent(Settings.ACTION_SETTINGS))
+
 private fun tryStart(context: Context, intent: Intent): Boolean = try {
     context.startActivity(intent)
     true

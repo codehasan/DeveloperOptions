@@ -33,7 +33,10 @@ class DisabledActivity : AppCompatActivity() {
             // already on (we're only still here because its screen wouldn't open),
             // retry opening it; otherwise send the user to About phone to turn it on.
             if (isDeveloperOptionsEnabled(this)) {
-                if (openDeveloperOptions(this)) finish()
+                // Try the Developer options screen; if it won't open on this
+                // build, fall back to the main Settings app so the user can
+                // still get there manually.
+                if (openDeveloperOptions(this) || openSettings(this)) finish()
             } else {
                 openAboutPhone(this)
             }
