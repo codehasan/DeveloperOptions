@@ -7,4 +7,41 @@
     <string name="enabled_message">It couldn\'t be opened automatically. Tap the button to open it.</string>
     <string name="open_dev_options">Open</string>
     <string name="cannot_open_settings">Failed to open Settings</string>
+    <string name="ok">OK</string>
+
+    <!-- OEM-specific "how to enable Developer options" guide (ported from Dev Tools' g.dvz.bo). -->
+    <string name="dev_options_guide_title">Open Developer Options</string>
+    <string name="dev_options_guide_step_1"><![CDATA[<b>1. </b>Click the "<b>OK</b>" button to go to the "%1$s" page.]]></string>
+    <string name="dev_options_guide_step_2"><![CDATA[<b>2. </b>Rapidly tap <b>"%1$s"</b> 7 times until it says you are a developer.]]></string>
+    <string name="dev_options_guide_suffix">Return to this app after completion.</string>
+
+    <!-- Step 1: the settings page the user must open, per manufacturer (phone / tablet variants). -->
+    <string name="dev_options_page_default">About Phone</string>
+    <string name="dev_options_page_default_tablet">About Tablet</string>
+    <string name="dev_options_page_honor">About Phone</string>
+    <string name="dev_options_page_huawei">About Phone</string>
+    <string name="dev_options_page_huawei_tablet">About Tablet</string>
+    <string name="dev_options_page_hyperos">About phone</string>
+    <string name="dev_options_page_hyperos_tablet">About tablet</string>
+    <string name="dev_options_page_miui">About phone</string>
+    <string name="dev_options_page_miui_tablet">About tablet</string>
+    <string name="dev_options_page_oneplus">About Device -&gt; Version</string>
+    <string name="dev_options_page_oppo">About device -&gt; Version</string>
+    <string name="dev_options_page_realme">About Device -&gt; Version</string>
+    <string name="dev_options_page_samsung">About Phone -&gt; Software Information</string>
+    <string name="dev_options_page_samsung_tablet">About Tablet -&gt; Software Information</string>
+    <string name="dev_options_page_vivo">About Phone -&gt; Version info</string>
+    <string name="dev_options_page_vivo_tablet">About tablet -&gt; Version info</string>
+
+    <!-- Step 2: the field to tap 7 times, per manufacturer. -->
+    <string name="dev_options_path_default">Build number</string>
+    <string name="dev_options_path_honor">Build number</string>
+    <string name="dev_options_path_huawei">Software version</string>
+    <string name="dev_options_path_hyperos">OS version</string>
+    <string name="dev_options_path_miui">MIUI version</string>
+    <string name="dev_options_path_oneplus">Version number</string>
+    <string name="dev_options_path_oppo">Build number</string>
+    <string name="dev_options_path_realme">Version</string>
+    <string name="dev_options_path_samsung">Build number</string>
+    <string name="dev_options_path_vivo">Software information</string>
 </resources>

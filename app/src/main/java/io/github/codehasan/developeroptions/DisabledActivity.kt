@@ -32,7 +32,7 @@ class DisabledActivity : AppCompatActivity() {
             if (isDeveloperOptionsEnabled(this)) {
                 if (openDeveloperOptions(this) || openSettings(this)) finish()
             } else {
-                openAboutPhone(this)
+                showDevOptionsGuide(this)
             }
         }
     }
