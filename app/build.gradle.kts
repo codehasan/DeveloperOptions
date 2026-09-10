@@ -21,8 +21,8 @@ android {
         minSdk = 26
         //noinspection OldTargetApi
         targetSdk = 36
-        versionCode = 1001
-        versionName = "1.0.1"
+        versionCode = 1002
+        versionName = "2.0"
     }
 
     signingConfigs {
