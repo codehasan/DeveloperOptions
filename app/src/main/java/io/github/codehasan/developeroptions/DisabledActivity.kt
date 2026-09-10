@@ -7,11 +7,13 @@ import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.SpannedString
 import android.text.style.ForegroundColorSpan
+import android.view.Gravity
 import android.widget.Button
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.text.HtmlCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
@@ -32,7 +34,7 @@ class DisabledActivity : AppCompatActivity() {
             if (isDeveloperOptionsEnabled(this)) {
                 if (openDeveloperOptions(this) || openSettings(this)) finish()
             } else {
-                showDevOptionsGuide(this)
+                openAboutPhone(this)
             }
         }
     }
@@ -41,10 +43,29 @@ class DisabledActivity : AppCompatActivity() {
         val enabled = isDeveloperOptionsEnabled(this)
         findViewById<TextView>(R.id.titleText).text =
             coloredAnnotations(if (enabled) R.string.enabled_title else R.string.disabled_title)
-        findViewById<TextView>(R.id.messageText).text =
-            getText(if (enabled) R.string.enabled_message else R.string.disabled_message)
+        findViewById<TextView>(R.id.messageText).apply {
+            if (enabled) {
+                gravity = Gravity.CENTER
+                text = getText(R.string.enabled_message)
+            } else {
+                gravity = Gravity.START
+                text = disabledSteps()
+            }
+        }
         findViewById<Button>(R.id.startButton).text =
             getText(if (enabled) R.string.open_dev_options else R.string.start)
+    }
+
+    /** Numbered, OEM-tailored steps for turning Developer options on. */
+    private fun disabledSteps(): CharSequence {
+        val hint = devOptionsHint(this)
+        val steps = listOf(
+            getString(R.string.dev_options_step_open, hint.aboutPage),
+            getString(R.string.dev_options_step_tap, hint.buildField),
+            getString(R.string.dev_options_step_return),
+        )
+        val html = steps.mapIndexed { i, step -> "${i + 1}.  $step" }.joinToString("<br/><br/>")
+        return HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_MODE_LEGACY)
     }
 
     /** Turns each <annotation color="error|success"> span into a theme-aware colored span. */

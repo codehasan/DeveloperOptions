@@ -1,21 +1,19 @@
 <resources>
     <string name="app_name">Developer Options</string>
     <string name="disabled_title">Developer Options is <annotation color="error">OFF</annotation></string>
-    <string name="disabled_message">Tap Start, then tap "Build number" 7 times to turn it on. Then press back.</string>
     <string name="start">Start</string>
     <string name="enabled_title">Developer Options is <annotation color="success">ON</annotation></string>
     <string name="enabled_message">It couldn\'t be opened automatically. Tap the button to open it.</string>
     <string name="open_dev_options">Open</string>
     <string name="cannot_open_settings">Failed to open Settings</string>
-    <string name="ok">OK</string>
 
-    <!-- OEM-specific "how to enable Developer options" guide (ported from Dev Tools' g.dvz.bo). -->
-    <string name="dev_options_guide_title">Open Developer Options</string>
-    <string name="dev_options_guide_step_1"><![CDATA[<b>1. </b>Click the "<b>OK</b>" button to go to the "%1$s" page.]]></string>
-    <string name="dev_options_guide_step_2"><![CDATA[<b>2. </b>Rapidly tap <b>"%1$s"</b> 7 times until it says you are a developer.]]></string>
-    <string name="dev_options_guide_suffix">Return to this app after completion.</string>
+    <!-- Numbered how-to shown while Developer options is off. %1$s is filled in with
+         the OEM-specific About page / Build-number field. -->
+    <string name="dev_options_step_open"><![CDATA[Tap <b>Start</b>, then open <b>%1$s</b>.]]></string>
+    <string name="dev_options_step_tap"><![CDATA[Tap <b>%1$s</b> 7 times until it says you\'re a developer.]]></string>
+    <string name="dev_options_step_return">Come back here — this screen updates on its own.</string>
 
-    <!-- Step 1: the settings page the user must open, per manufacturer (phone / tablet variants). -->
+    <!-- Step 1 target: the About screen to open, per manufacturer (phone / tablet). -->
     <string name="dev_options_page_default">About Phone</string>
     <string name="dev_options_page_default_tablet">About Tablet</string>
     <string name="dev_options_page_honor">About Phone</string>
@@ -33,7 +31,7 @@
     <string name="dev_options_page_vivo">About Phone -&gt; Version info</string>
     <string name="dev_options_page_vivo_tablet">About tablet -&gt; Version info</string>
 
-    <!-- Step 2: the field to tap 7 times, per manufacturer. -->
+    <!-- Step 2 target: the field to tap 7 times, per manufacturer. -->
     <string name="dev_options_path_default">Build number</string>
     <string name="dev_options_path_honor">Build number</string>
     <string name="dev_options_path_huawei">Software version</string>

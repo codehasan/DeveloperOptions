@@ -6,50 +6,32 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Build
-import android.os.Handler
-import android.os.Looper
 import android.provider.Settings
-import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
-import androidx.core.text.HtmlCompat
 
-// True if Developer options is actually toggled on. This is the real state, not
-// "reachable": on Vivo/FuntouchOS the build-number taps only make the screen
-// reachable, and this flag stays off until the user toggles it there by hand.
-//
-// Some OEMs record the flag under Settings.Secure instead of Settings.Global, so
-// treat it as enabled if either says so (ported from g.dvz.bw).
-fun isDeveloperOptionsEnabled(context: Context): Boolean = try {
-    val resolver = context.contentResolver
-    val onGlobal = Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 &&
-            Settings.Global.getInt(resolver, DEV_SETTINGS_KEY, 0) == 1
-    @Suppress("DEPRECATION")
-    onGlobal || Settings.Secure.getInt(resolver, DEV_SETTINGS_KEY, 0) == 1
-} catch (_: Exception) {
-    false
-}
+fun isDeveloperOptionsEnabled(context: Context): Boolean =
+    Settings.Global.getInt(
+        context.contentResolver,
+        Settings.Global.DEVELOPMENT_SETTINGS_ENABLED,
+        0
+    ) != 0
 
 /**
  * Opens the system Developer options screen; returns true if it launched.
  *
- * Ported from g.dvz.cb: the entry point differs by OEM and API level, so it walks
- * a tiered set of intents, verifying each resolves before firing it.
+ * The entry point differs by OEM and API level, so it walks a tiered set of
+ * intents, verifying each resolves before firing it (ported from Dev Tools).
  */
 fun openDeveloperOptions(context: Context): Boolean {
     // Vivo ships Developer options behind its own activity, not the AOSP one.
     if ("vivo".equals(Build.MANUFACTURER, ignoreCase = true)) {
         if (tryStartResolvable(context, componentIntent(VIVO_DEV_SETTINGS))) return true
     }
-    return when {
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.P -> launchOnDashboardEra(context)
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ->
-            tryStartResolvable(context, componentIntent(DEVELOPMENT_SETTINGS)) ||
-                    tryStartResolvable(context, Intent(ACTION_DEV_SETTINGS))
-
-        else ->
-            tryStartResolvable(context, Intent(ACTION_DEV_SETTINGS)) ||
-                    tryStartResolvable(context, componentIntent(DEVELOPMENT_SETTINGS))
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        launchOnDashboardEra(context)
+    } else {
+        tryStartResolvable(context, componentIntent(DEVELOPMENT_SETTINGS)) ||
+                tryStartResolvable(context, Intent(ACTION_DEV_SETTINGS))
     }
 }
 
@@ -78,60 +60,6 @@ private fun launchOnDashboardEra(context: Context): Boolean {
     return tryStartResolvable(context, action)
 }
 
-/**
- * Shows the OEM-specific "how to enable Developer options" dialog and, on OK,
- * sends the user to the right About screen. While it's up it watches for the flag
- * flipping on and takes over automatically (ported from g.dvz.bo).
- */
-fun showDevOptionsGuide(activity: Activity) {
-    val tablet = isTablet(activity)
-    val key = oemKey()
-    val page = activity.getString(pageResFor(key, tablet))
-    val field = activity.getString(pathResFor(key))
-    val html = activity.getString(R.string.dev_options_guide_step_1, page) +
-            "<br/><br/>" + activity.getString(R.string.dev_options_guide_step_2, field) +
-            "<br/><br/>" + activity.getString(R.string.dev_options_guide_suffix)
-
-    val body = TextView(activity).apply {
-        text = HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_MODE_LEGACY)
-        setLineSpacing(0f, 1.4f)
-        val h = dp(activity, 24f)
-        setPadding(h, dp(activity, 16f), h, 0)
-        textSize = 16f
-    }
-
-    val dialog = AlertDialog.Builder(activity)
-        .setTitle(R.string.dev_options_guide_title)
-        .setView(body)
-        .setPositiveButton(R.string.ok, null)
-        .create()
-    dialog.show()
-
-    // Set the listener directly so tapping OK doesn't auto-dismiss: the dialog
-    // stays up as a reference while the user is in Settings.
-    dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setOnClickListener {
-        if (isDeveloperOptionsEnabled(activity)) {
-            openDeveloperOptions(activity)
-            dialog.dismiss()
-        } else {
-            openAboutPhone(activity)
-        }
-    }
-
-    val handler = Handler(Looper.getMainLooper())
-    val poll = object : Runnable {
-        override fun run() {
-            if (isDeveloperOptionsEnabled(activity)) {
-                if (openDeveloperOptions(activity)) dialog.dismiss()
-            } else {
-                handler.postDelayed(this, POLL_INTERVAL_MS)
-            }
-        }
-    }
-    handler.postDelayed(poll, POLL_INTERVAL_MS)
-    dialog.setOnDismissListener { handler.removeCallbacks(poll) }
-}
-
 /** Opens the About phone screen where Build number lives; OEM-aware for Xiaomi. */
 fun openAboutPhone(context: Context): Boolean {
     if (isXiaomi()) {
@@ -146,6 +74,17 @@ fun openAboutPhone(context: Context): Boolean {
 
 /** Last-resort fallback for when the Developer options screen won't launch. */
 fun openSettings(context: Context): Boolean = tryStart(context, Intent(Settings.ACTION_SETTINGS))
+
+/** Where Build number hides on this device: the About screen and the field to tap. */
+data class DevOptionsHint(val aboutPage: String, val buildField: String)
+
+fun devOptionsHint(context: Context): DevOptionsHint {
+    val key = oemKey()
+    return DevOptionsHint(
+        aboutPage = context.getString(pageResFor(key, isTablet(context))),
+        buildField = context.getString(pathResFor(key)),
+    )
+}
 
 // Fires only if the intent resolves to an activity (mirrors g.aby.g's guarded launch).
 private fun tryStartResolvable(context: Context, intent: Intent): Boolean = try {
@@ -197,9 +136,6 @@ private fun isTablet(context: Context): Boolean {
     return size >= Configuration.SCREENLAYOUT_SIZE_LARGE
 }
 
-private fun dp(context: Context, value: Float): Int =
-    (value * context.resources.displayMetrics.density).toInt()
-
 // Step 1 destination. Only miui/hyperos/huawei/samsung/vivo have distinct tablet
 // wording; the rest reuse their phone string, and unknown OEMs fall to a default.
 private fun pageResFor(key: String, tablet: Boolean): Int = when (key) {
@@ -229,7 +165,6 @@ private fun pathResFor(key: String): Int = when (key) {
     else -> R.string.dev_options_path_default
 }
 
-private const val DEV_SETTINGS_KEY = Settings.Global.DEVELOPMENT_SETTINGS_ENABLED
 private const val ACTION_DEV_SETTINGS: String = Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS
 private const val SETTINGS_PACKAGE = "com.android.settings"
 private const val DEVELOPMENT_DASHBOARD =
@@ -239,4 +174,3 @@ private const val DISABLED_ACTIVITY_SUFFIX = ".DevelopmentSettingsDisabledActivi
 private const val VIVO_DEV_SETTINGS = "com.vivo.settings.DevelpmentSettingsActivity2"
 private const val XIAOMI_DEVICE_INFO = "com.android.settings.Settings\$MyDeviceInfoActivity"
 private const val XIAOMI_DEVICE_INFO_ACTION = "miui.intent.action.DEVICE_INFO_SETTINGS"
-private const val POLL_INTERVAL_MS = 1000L
