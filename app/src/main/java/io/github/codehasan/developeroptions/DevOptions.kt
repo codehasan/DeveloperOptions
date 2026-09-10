@@ -1,6 +1,5 @@
 package io.github.codehasan.developeroptions
 
-import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -8,6 +7,7 @@ import android.content.res.Configuration
 import android.os.Build
 import android.provider.Settings
 import android.widget.Toast
+import java.util.Locale
 
 fun isDeveloperOptionsEnabled(context: Context): Boolean =
     Settings.Global.getInt(
@@ -25,30 +25,23 @@ fun isDeveloperOptionsEnabled(context: Context): Boolean =
 fun openDeveloperOptions(context: Context): Boolean {
     // Vivo ships Developer options behind its own activity, not the AOSP one.
     if ("vivo".equals(Build.MANUFACTURER, ignoreCase = true)) {
-        if (tryStartResolvable(context, componentIntent(VIVO_DEV_SETTINGS))) return true
+        if (tryStart(context, componentIntent(VIVO_DEV_SETTINGS))) return true
     }
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
         launchOnDashboardEra(context)
     } else {
-        tryStartResolvable(context, componentIntent(DEVELOPMENT_SETTINGS)) ||
-                tryStartResolvable(context, Intent(ACTION_DEV_SETTINGS))
+        tryStart(context, componentIntent(DEVELOPMENT_SETTINGS)) ||
+                tryStart(context, Intent(ACTION_DEV_SETTINGS))
     }
 }
 
 // Android 9+ (Settings dashboard era): prefer the modern dashboard activity, fall
 // back to the legacy component, then the implicit action.
 private fun launchOnDashboardEra(context: Context): Boolean {
-    val pm = context.packageManager ?: return false
-    val dashboard = componentIntent(DEVELOPMENT_DASHBOARD)
-    if (pm.queryIntentActivities(dashboard, 0).isNotEmpty()) {
-        return tryStartResolvable(context, dashboard)
-    }
-    val legacy = componentIntent(DEVELOPMENT_SETTINGS)
-    if (pm.queryIntentActivities(legacy, 0).isNotEmpty()) {
-        return tryStartResolvable(context, legacy)
-    }
+    if (tryStart(context, componentIntent(DEVELOPMENT_DASHBOARD))) return true
+    if (tryStart(context, componentIntent(DEVELOPMENT_SETTINGS))) return true
     val action = Intent(ACTION_DEV_SETTINGS)
-    val resolvers = pm.queryIntentActivities(action, 0)
+    val resolvers = context.packageManager?.queryIntentActivities(action, 0).orEmpty()
     if (resolvers.isEmpty()) return false
     // A lone DevelopmentSettingsDisabledActivity means the screen is the "disabled"
     // stub — the real one isn't enabled yet, so don't treat it as launchable.
@@ -57,14 +50,14 @@ private fun launchOnDashboardEra(context: Context): Boolean {
     ) {
         return false
     }
-    return tryStartResolvable(context, action)
+    return tryStart(context, action)
 }
 
 /** Opens the About phone screen where Build number lives; OEM-aware for Xiaomi. */
 fun openAboutPhone(context: Context): Boolean {
     if (isXiaomi()) {
-        if (tryStartResolvable(context, componentIntent(XIAOMI_DEVICE_INFO))) return true
-        if (tryStartResolvable(context, Intent(XIAOMI_DEVICE_INFO_ACTION))) return true
+        if (tryStart(context, componentIntent(XIAOMI_DEVICE_INFO))) return true
+        if (tryStart(context, Intent(XIAOMI_DEVICE_INFO_ACTION))) return true
     }
     if (tryStart(context, Intent(Settings.ACTION_DEVICE_INFO_SETTINGS))) return true
     if (tryStart(context, Intent(Settings.ACTION_SETTINGS))) return true
@@ -86,29 +79,18 @@ fun devOptionsHint(context: Context): DevOptionsHint {
     )
 }
 
-// Fires only if the intent resolves to an activity (mirrors g.aby.g's guarded launch).
-private fun tryStartResolvable(context: Context, intent: Intent): Boolean = try {
-    val pm = context.packageManager
-    if (pm != null && pm.queryIntentActivities(intent, 0).isEmpty()) {
+// Fires only if the intent resolves to an activity (mirrors the guarded launch
+// ported from Dev Tools). Callers are all Activity contexts, so the launch stays
+// in-task and the returning onResume detection keeps working.
+private fun tryStart(context: Context, intent: Intent): Boolean = try {
+    if (context.packageManager?.queryIntentActivities(intent, 0).isNullOrEmpty()) {
         false
     } else {
-        startFrom(context, intent)
+        context.startActivity(intent)
         true
     }
 } catch (_: Exception) {
     false
-}
-
-private fun tryStart(context: Context, intent: Intent): Boolean = try {
-    startFrom(context, intent)
-    true
-} catch (_: Exception) {
-    false
-}
-
-private fun startFrom(context: Context, intent: Intent) {
-    if (context !is Activity) intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-    context.startActivity(intent)
 }
 
 private fun componentIntent(activity: String): Intent =
@@ -120,7 +102,7 @@ private fun isXiaomi(): Boolean = "xiaomi".equals(Build.MANUFACTURER, ignoreCase
 private fun oemKey(): String = when {
     isXiaomi() && isHyperOs() -> "hyperos"
     isXiaomi() -> "miui"
-    else -> Build.MANUFACTURER.orEmpty().lowercase()
+    else -> Build.MANUFACTURER.orEmpty().lowercase(Locale.ROOT)
 }
 
 private fun isHyperOs(): Boolean = try {

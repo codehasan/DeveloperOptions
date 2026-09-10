@@ -1,16 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!--
-      Package visibility (Android 11+): make the Settings package visible so we can
-      launch its Developer options activity explicitly by class name as a fallback
-      (see openDeveloperOptions). Without this, an explicit start into another
-      package throws ActivityNotFoundException under targetSdk 30+.
-    -->
     <queries>
         <package android:name="com.android.settings" />
         <intent>
-            <action android:name="android.settings.APPLICATION_DEVELOPMENT_SETTINGS" />
+            <action android:name="miui.intent.action.DEVICE_INFO_SETTINGS" />
         </intent>
     </queries>
 
