@@ -20,7 +20,7 @@ fun isDeveloperOptionsEnabled(context: Context): Boolean =
  * Opens the system Developer options screen; returns true if it launched.
  *
  * The entry point differs by OEM and API level, so it walks a tiered set of
- * intents, verifying each resolves before firing it (ported from Dev Tools).
+ * intents, verifying each resolves before firing it.
  */
 fun openDeveloperOptions(context: Context): Boolean {
     // Vivo ships Developer options behind its own activity, not the AOSP one.
@@ -35,11 +35,12 @@ fun openDeveloperOptions(context: Context): Boolean {
     }
 }
 
-// Android 9+ (Settings dashboard era): prefer the modern dashboard activity, fall
-// back to the legacy component, then the implicit action.
+// Android 9+ (Settings dashboard era): try the modern dashboard activity, then the
+// legacy and OEM-specific components, then the implicit action.
 private fun launchOnDashboardEra(context: Context): Boolean {
     if (tryStart(context, componentIntent(DEVELOPMENT_DASHBOARD))) return true
     if (tryStart(context, componentIntent(DEVELOPMENT_SETTINGS))) return true
+    if (tryStart(context, componentIntent(TRANSSION_DEV_SETTINGS))) return true
     val action = Intent(ACTION_DEV_SETTINGS)
     val resolvers = context.packageManager?.queryIntentActivities(action, 0).orEmpty()
     if (resolvers.isEmpty()) return false
@@ -79,9 +80,8 @@ fun devOptionsHint(context: Context): DevOptionsHint {
     )
 }
 
-// Fires only if the intent resolves to an activity (mirrors the guarded launch
-// ported from Dev Tools). Callers are all Activity contexts, so the launch stays
-// in-task and the returning onResume detection keeps working.
+// Fires only if the intent resolves to an activity. Callers pass Activity contexts,
+// so the launch stays in-task and the returning onResume detection keeps working.
 private fun tryStart(context: Context, intent: Intent): Boolean = try {
     if (context.packageManager?.queryIntentActivities(intent, 0).isNullOrEmpty()) {
         false
@@ -149,10 +149,13 @@ private fun pathResFor(key: String): Int = when (key) {
 
 private const val ACTION_DEV_SETTINGS: String = Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS
 private const val SETTINGS_PACKAGE = "com.android.settings"
+private const val SYSTEM_DASHBOARD = $$"com.android.settings.Settings$SystemDashboardActivity"
 private const val DEVELOPMENT_DASHBOARD =
-    "com.android.settings.Settings\$DevelopmentSettingsDashboardActivity"
+    $$"com.android.settings.Settings$DevelopmentSettingsDashboardActivity"
 private const val DEVELOPMENT_SETTINGS = "com.android.settings.DevelopmentSettings"
 private const val DISABLED_ACTIVITY_SUFFIX = ".DevelopmentSettingsDisabledActivity"
+private const val TRANSSION_DEV_SETTINGS =
+    $$"com.android.settings.Settings$DevelopmentSettingsActivity"
 private const val VIVO_DEV_SETTINGS = "com.vivo.settings.DevelpmentSettingsActivity2"
-private const val XIAOMI_DEVICE_INFO = "com.android.settings.Settings\$MyDeviceInfoActivity"
+private const val XIAOMI_DEVICE_INFO = $$"com.android.settings.Settings$MyDeviceInfoActivity"
 private const val XIAOMI_DEVICE_INFO_ACTION = "miui.intent.action.DEVICE_INFO_SETTINGS"

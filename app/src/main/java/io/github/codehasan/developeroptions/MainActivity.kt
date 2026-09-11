@@ -8,8 +8,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Opening succeeds when the screen is reachable (enabled on stock, or just
-        // reachable-but-off on Vivo — either way, take the user there).
+        // Jump straight to the system screen only when it's enabled and actually
+        // opens; otherwise hand off to the guidance screen.
         if (!isDeveloperOptionsEnabled(this) || !openDeveloperOptions(this)) {
             startActivity(Intent(this, DisabledActivity::class.java))
         }
