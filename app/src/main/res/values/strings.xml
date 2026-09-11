@@ -10,7 +10,7 @@
     <!-- Numbered how-to shown while Developer options is off. %1$s is filled in with
          the OEM-specific About page / Build-number field. -->
     <string name="dev_options_step_open"><![CDATA[Tap <b>Start</b>, then open <b>%1$s</b>.]]></string>
-    <string name="dev_options_step_tap"><![CDATA[Tap <b>%1$s</b> 7 times until it says you\'re a developer.]]></string>
+    <string name="dev_options_step_tap"><![CDATA[Tap <b>%1$s</b> 7 times.]]></string>
     <string name="dev_options_step_return">Tap back button.</string>
 
     <!-- Step 1 target: the About screen to open, per manufacturer (phone / tablet). -->
