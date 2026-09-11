@@ -6,9 +6,12 @@ plugins {
     alias(libs.plugins.android.application)
 }
 
-var keystorePropertiesFile: File = rootProject.file("app/keystore.properties")
-var keystoreProperties: Properties = Properties()
-keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+// Release signing is optional: absent keystore.properties (e.g. a fresh clone or CI),
+// the release signingConfig is skipped so debug builds still work.
+val keystorePropertiesFile: File = rootProject.file("app/keystore.properties")
+val keystoreProperties: Properties? = keystorePropertiesFile.takeIf { it.exists() }?.let {
+    Properties().apply { FileInputStream(it).use(::load) }
+}
 
 android {
     namespace = "io.github.codehasan.developeroptions"
@@ -26,11 +29,13 @@ android {
     }
 
     signingConfigs {
-        create("release") {
-            storeFile = keystoreProperties["storeFile"]?.let { file(it) }
-            storePassword = keystoreProperties["storePassword"].toString()
-            keyAlias = keystoreProperties["keyAlias"].toString()
-            keyPassword = keystoreProperties["keyPassword"].toString()
+        keystoreProperties?.let { props ->
+            create("release") {
+                storeFile = props["storeFile"]?.let { file(it) }
+                storePassword = props["storePassword"].toString()
+                keyAlias = props["keyAlias"].toString()
+                keyPassword = props["keyPassword"].toString()
+            }
         }
     }
 
@@ -38,7 +43,7 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
-            signingConfig = signingConfigs.getByName("release")
+            signingConfig = signingConfigs.findByName("release")
         }
     }
 
