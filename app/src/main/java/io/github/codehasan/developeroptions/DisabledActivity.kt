@@ -32,9 +32,17 @@ class DisabledActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.startButton).setOnClickListener {
             if (isDeveloperOptionsEnabled(this)) {
-                if (openDeveloperOptions(this) || openSettings(this)) finish()
+                if (openDeveloperOptions(this) ||
+                    openSystem(this) ||
+                    openSettings(this)
+                ) finish()
             } else {
+                // Unconditional: the disabled-stub name match can false-negative if an
+                // OEM renames it, so About phone must not hinge on openDeveloperOptions.
                 openAboutPhone(this)
+                // Fix for OEMs who only enable the Activity,
+                // but doesn't change the Settings value
+                openDeveloperOptions(this)
             }
         }
     }
@@ -64,7 +72,7 @@ class DisabledActivity : AppCompatActivity() {
             getString(R.string.dev_options_step_tap, hint.buildField),
             getString(R.string.dev_options_step_return),
         )
-        val html = steps.mapIndexed { i, step -> "${i + 1}.  $step" }.joinToString("<br/><br/>")
+        val html = steps.mapIndexed { i, step -> "${i + 1}.  $step" }.joinToString("<br/>")
         return HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_MODE_LEGACY)
     }
 

@@ -3,11 +3,9 @@ package io.github.codehasan.developeroptions
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
 import android.os.Build
 import android.provider.Settings
 import android.widget.Toast
-import java.util.Locale
 
 fun isDeveloperOptionsEnabled(context: Context): Boolean =
     Settings.Global.getInt(
@@ -23,46 +21,63 @@ fun isDeveloperOptionsEnabled(context: Context): Boolean =
  * intents, verifying each resolves before firing it.
  */
 fun openDeveloperOptions(context: Context): Boolean {
-    // Vivo ships Developer options behind its own activity, not the AOSP one.
-    if ("vivo".equals(Build.MANUFACTURER, ignoreCase = true)) {
-        if (tryStart(context, componentIntent(VIVO_DEV_SETTINGS))) return true
+    if (isVivo()) {
+        if (tryStart(context, VIVO_DEV_SETTINGS)) return true
     }
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-        launchOnDashboardEra(context)
+        launchDevOptionsApi28(context)
     } else {
-        tryStart(context, componentIntent(DEVELOPMENT_SETTINGS)) ||
+        tryStart(context, DEVELOPMENT_SETTINGS) ||
                 tryStart(context, Intent(ACTION_DEV_SETTINGS))
     }
 }
 
-// Android 9+ (Settings dashboard era): try the modern dashboard activity, then the
-// legacy and OEM-specific components, then the implicit action.
-private fun launchOnDashboardEra(context: Context): Boolean {
-    if (tryStart(context, componentIntent(DEVELOPMENT_DASHBOARD))) return true
-    if (tryStart(context, componentIntent(DEVELOPMENT_SETTINGS))) return true
-    if (tryStart(context, componentIntent(TRANSSION_DEV_SETTINGS))) return true
-    val action = Intent(ACTION_DEV_SETTINGS)
-    val resolvers = context.packageManager?.queryIntentActivities(action, 0).orEmpty()
-    if (resolvers.isEmpty()) return false
-    // A lone DevelopmentSettingsDisabledActivity means the screen is the "disabled"
-    // stub — the real one isn't enabled yet, so don't treat it as launchable.
-    if (resolvers.size == 1 &&
-        resolvers[0].activityInfo?.name.orEmpty().endsWith(DISABLED_ACTIVITY_SUFFIX)
-    ) {
-        return false
+private fun launchDevOptionsApi28(context: Context): Boolean {
+    if (tryStart(context, DEVELOPMENT_DASHBOARD)) return true
+    if (tryStart(context, DEVELOPMENT_SETTINGS)) return true
+    if (tryStart(context, TRANSSION_DEV_SETTINGS)) return true
+    val devSettings = Intent(ACTION_DEV_SETTINGS)
+    val resolvers = context.packageManager?.queryIntentActivities(devSettings, 0).orEmpty()
+    return when {
+        resolvers.isEmpty() -> false
+        // A lone DevelopmentSettingsDisabledActivity means the screen is the "disabled"
+        // stub — the real one isn't enabled yet, so don't treat it as launchable.
+        resolvers.size == 1 && resolvers[0].activityInfo?.name.orEmpty()
+            .endsWith(DEV_ACTIVITY_DISABLED_SUFFIX) -> false
+
+        else -> tryStart(context, devSettings)
     }
-    return tryStart(context, action)
 }
 
 /** Opens the About phone screen where Build number lives; OEM-aware for Xiaomi. */
 fun openAboutPhone(context: Context): Boolean {
     if (isXiaomi()) {
-        if (tryStart(context, componentIntent(XIAOMI_DEVICE_INFO))) return true
-        if (tryStart(context, Intent(XIAOMI_DEVICE_INFO_ACTION))) return true
+        if (tryStart(context, XIAOMI_DEVICE_INFO)) return true
+        if (tryStart(context, Intent(ACTION_XIAOMI_DEVICE_INFO))) return true
     }
     if (tryStart(context, Intent(Settings.ACTION_DEVICE_INFO_SETTINGS))) return true
     if (tryStart(context, Intent(Settings.ACTION_SETTINGS))) return true
     Toast.makeText(context, R.string.cannot_open_settings, Toast.LENGTH_LONG).show()
+    return false
+}
+
+/** Opens the System screen where Developer options lives; OEM-aware for Xiaomi. */
+fun openSystem(context: Context): Boolean {
+    if (isXiaomi()) {
+        val additionalSettings = Intent().apply {
+            setComponent(
+                ComponentName(SETTINGS_PACKAGE, SUB_SETTINGS)
+            )
+            putExtra(
+                ":settings:show_fragment",
+                "com.android.settings.personal.OtherPersonalSettings"
+            )
+        }
+        if (tryStart(context, additionalSettings)) return true
+    }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        if (tryStart(context, SYSTEM_DASHBOARD)) return true
+    }
     return false
 }
 
@@ -80,8 +95,13 @@ fun devOptionsHint(context: Context): DevOptionsHint {
     )
 }
 
-// Fires only if the intent resolves to an activity. Callers pass Activity contexts,
-// so the launch stays in-task and the returning onResume detection keeps working.
+private fun tryStart(context: Context, activity: String): Boolean = tryStart(
+    context,
+    Intent().setComponent(
+        ComponentName(SETTINGS_PACKAGE, activity)
+    )
+)
+
 private fun tryStart(context: Context, intent: Intent): Boolean = try {
     if (context.packageManager?.queryIntentActivities(intent, 0).isNullOrEmpty()) {
         false
@@ -91,31 +111,6 @@ private fun tryStart(context: Context, intent: Intent): Boolean = try {
     }
 } catch (_: Exception) {
     false
-}
-
-private fun componentIntent(activity: String): Intent =
-    Intent().setComponent(ComponentName(SETTINGS_PACKAGE, activity))
-
-private fun isXiaomi(): Boolean = "xiaomi".equals(Build.MANUFACTURER, ignoreCase = true)
-
-// Xiaomi's ROM is keyed as "hyperos" or "miui" (not "xiaomi"), matching the guide maps.
-private fun oemKey(): String = when {
-    isXiaomi() && isHyperOs() -> "hyperos"
-    isXiaomi() -> "miui"
-    else -> Build.MANUFACTURER.orEmpty().lowercase(Locale.ROOT)
-}
-
-private fun isHyperOs(): Boolean = try {
-    val get = Class.forName("android.os.SystemProperties")
-        .getMethod("get", String::class.java)
-    !(get.invoke(null, "ro.mi.os.version.name") as? String).isNullOrEmpty()
-} catch (_: Exception) {
-    false
-}
-
-private fun isTablet(context: Context): Boolean {
-    val size = context.resources.configuration.screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK
-    return size >= Configuration.SCREENLAYOUT_SIZE_LARGE
 }
 
 // Step 1 destination. Only miui/hyperos/huawei/samsung/vivo have distinct tablet
@@ -149,13 +144,14 @@ private fun pathResFor(key: String): Int = when (key) {
 
 private const val ACTION_DEV_SETTINGS: String = Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS
 private const val SETTINGS_PACKAGE = "com.android.settings"
+private const val SUB_SETTINGS = "com.android.settings.SubSettings"
 private const val SYSTEM_DASHBOARD = $$"com.android.settings.Settings$SystemDashboardActivity"
 private const val DEVELOPMENT_DASHBOARD =
     $$"com.android.settings.Settings$DevelopmentSettingsDashboardActivity"
 private const val DEVELOPMENT_SETTINGS = "com.android.settings.DevelopmentSettings"
-private const val DISABLED_ACTIVITY_SUFFIX = ".DevelopmentSettingsDisabledActivity"
 private const val TRANSSION_DEV_SETTINGS =
     $$"com.android.settings.Settings$DevelopmentSettingsActivity"
 private const val VIVO_DEV_SETTINGS = "com.vivo.settings.DevelpmentSettingsActivity2"
 private const val XIAOMI_DEVICE_INFO = $$"com.android.settings.Settings$MyDeviceInfoActivity"
-private const val XIAOMI_DEVICE_INFO_ACTION = "miui.intent.action.DEVICE_INFO_SETTINGS"
+private const val ACTION_XIAOMI_DEVICE_INFO = "miui.intent.action.DEVICE_INFO_SETTINGS"
+private const val DEV_ACTIVITY_DISABLED_SUFFIX = ".DevelopmentSettingsDisabledActivity"
