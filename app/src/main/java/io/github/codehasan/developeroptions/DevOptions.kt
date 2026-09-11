@@ -117,13 +117,13 @@ private fun pathResFor(key: String): Int = when (key) {
 
 private const val ACTION_DEV_SETTINGS: String = Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS
 private const val SETTINGS_PACKAGE = "com.android.settings"
-private const val SYSTEM_DASHBOARD = $$"com.android.settings.Settings$SystemDashboardActivity"
+private const val SYSTEM_DASHBOARD = "com.android.settings.Settings\$SystemDashboardActivity"
 private const val DEVELOPMENT_DASHBOARD =
-    $$"com.android.settings.Settings$DevelopmentSettingsDashboardActivity"
+    "com.android.settings.Settings\$DevelopmentSettingsDashboardActivity"
 private const val DEVELOPMENT_SETTINGS = "com.android.settings.DevelopmentSettings"
 private const val TRANSSION_DEV_SETTINGS =
-    $$"com.android.settings.Settings$DevelopmentSettingsActivity"
+    "com.android.settings.Settings\$DevelopmentSettingsActivity"
 private const val VIVO_DEV_SETTINGS = "com.vivo.settings.DevelpmentSettingsActivity2"
-private const val XIAOMI_DEVICE_INFO = $$"com.android.settings.Settings$MyDeviceInfoActivity"
+private const val XIAOMI_DEVICE_INFO = "com.android.settings.Settings\$MyDeviceInfoActivity"
 private const val ACTION_XIAOMI_DEVICE_INFO = "miui.intent.action.DEVICE_INFO_SETTINGS"
 private const val DEV_ACTIVITY_DISABLED_SUFFIX = ".DevelopmentSettingsDisabledActivity"
