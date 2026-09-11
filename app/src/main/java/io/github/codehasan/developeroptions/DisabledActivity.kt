@@ -28,7 +28,10 @@ class DisabledActivity : AppCompatActivity() {
             insets
         }
 
-        findViewById<TextView>(R.id.deviceText).text = deviceName()
+        findViewById<TextView>(R.id.deviceText).apply {
+            text = deviceName()
+            setOnClickListener { openAboutPhone(context) }
+        }
 
         findViewById<Button>(R.id.startButton).setOnClickListener {
             if (isDeveloperOptionsEnabled(this)) {

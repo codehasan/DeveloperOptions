@@ -3,7 +3,6 @@ package io.github.codehasan.developeroptions
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.provider.Settings
 import android.widget.Toast
 
@@ -24,15 +23,6 @@ fun openDeveloperOptions(context: Context): Boolean {
     if (isVivo()) {
         if (tryStart(context, VIVO_DEV_SETTINGS)) return true
     }
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-        launchDevOptionsApi28(context)
-    } else {
-        tryStart(context, DEVELOPMENT_SETTINGS) ||
-                tryStart(context, Intent(ACTION_DEV_SETTINGS))
-    }
-}
-
-private fun launchDevOptionsApi28(context: Context): Boolean {
     if (tryStart(context, DEVELOPMENT_DASHBOARD)) return true
     if (tryStart(context, DEVELOPMENT_SETTINGS)) return true
     if (tryStart(context, TRANSSION_DEV_SETTINGS)) return true
@@ -61,25 +51,8 @@ fun openAboutPhone(context: Context): Boolean {
     return false
 }
 
-/** Opens the System screen where Developer options lives; OEM-aware for Xiaomi. */
-fun openSystem(context: Context): Boolean {
-    if (isXiaomi()) {
-        val additionalSettings = Intent().apply {
-            setComponent(
-                ComponentName(SETTINGS_PACKAGE, SUB_SETTINGS)
-            )
-            putExtra(
-                ":settings:show_fragment",
-                "com.android.settings.personal.OtherPersonalSettings"
-            )
-        }
-        if (tryStart(context, additionalSettings)) return true
-    }
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-        if (tryStart(context, SYSTEM_DASHBOARD)) return true
-    }
-    return false
-}
+/** Opens the System screen where Developer options lives. */
+fun openSystem(context: Context): Boolean = tryStart(context, SYSTEM_DASHBOARD)
 
 /** Last-resort fallback for when the Developer options screen won't launch. */
 fun openSettings(context: Context): Boolean = tryStart(context, Intent(Settings.ACTION_SETTINGS))
@@ -144,7 +117,6 @@ private fun pathResFor(key: String): Int = when (key) {
 
 private const val ACTION_DEV_SETTINGS: String = Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS
 private const val SETTINGS_PACKAGE = "com.android.settings"
-private const val SUB_SETTINGS = "com.android.settings.SubSettings"
 private const val SYSTEM_DASHBOARD = $$"com.android.settings.Settings$SystemDashboardActivity"
 private const val DEVELOPMENT_DASHBOARD =
     $$"com.android.settings.Settings$DevelopmentSettingsDashboardActivity"
