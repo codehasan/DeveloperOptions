@@ -5,8 +5,7 @@
 <h1 align="center">Developer Options</h1>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/min%20Android-7.0%20(API%2024)-3DDC84?logo=android&logoColor=white" alt="Min Android 7.0">
-  <img src="https://img.shields.io/badge/target%20Android-16%20(API%2036)-3DDC84?logo=android&logoColor=white" alt="Target Android 16">
+  <img src="https://img.shields.io/badge/Android-7%20to%2016-3DDC84?logo=android&logoColor=white" alt="Android 7-16">
   <a href="LICENSE"><img src="https://img.shields.io/github/license/codehasan/DeveloperOptions?color=blue" alt="License: MIT"></a>
   <a href="https://github.com/codehasan/DeveloperOptions/releases/latest"><img src="https://img.shields.io/github/v/release/codehasan/DeveloperOptions?display_name=tag&sort=semver" alt="Latest release"></a>
 </p>
