@@ -23,13 +23,13 @@
 
             <TextView
                 android:id="@+id/titleText"
+                style="@style/TextStyle.Bold"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:text="@string/disabled_title"
                 android:textColor="@color/text_title"
-                android:textSize="26sp"
-                android:textStyle="bold" />
+                android:textSize="26sp" />
 
             <TextView
                 android:id="@+id/messageText"

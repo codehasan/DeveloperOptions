@@ -15,4 +15,9 @@
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowNoTitle">true</item>
     </style>
+
+    <style name="TextStyle.Bold">
+        <item name="android:fontFamily">@font/product_sans_medium</item>
+        <item name="fontFamily">@font/product_sans_medium</item>
+    </style>
 </resources>

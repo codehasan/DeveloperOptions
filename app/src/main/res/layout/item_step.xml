@@ -12,13 +12,13 @@
 
     <TextView
         android:id="@+id/stepNumber"
+        style="@style/TextStyle.Bold"
         android:layout_width="28dp"
         android:layout_height="28dp"
         android:background="@drawable/bg_step_number"
         android:gravity="center"
         android:textColor="@color/on_accent"
         android:textSize="15sp"
-        android:textStyle="bold"
         tools:text="1" />
 
     <TextView
