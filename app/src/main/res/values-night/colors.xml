@@ -5,4 +5,10 @@
     <color name="text_subtitle">#BDC1C6</color>
     <color name="text_error">#F28B82</color>
     <color name="text_success">#81C995</color>
+
+    <!-- Accent is light in dark mode, so button/badge text on it must be dark. -->
+    <color name="on_accent">#0B0B0B</color>
+    <color name="surface_card">#1C1C1E</color>
+    <color name="tint_on">#0D140F</color>
+    <color name="tint_off">#150F0E</color>
 </resources>

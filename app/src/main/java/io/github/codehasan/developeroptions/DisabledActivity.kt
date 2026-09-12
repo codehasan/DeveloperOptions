@@ -7,8 +7,9 @@ import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.SpannedString
 import android.text.style.ForegroundColorSpan
-import android.view.Gravity
+import android.view.LayoutInflater
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -54,32 +55,50 @@ class DisabledActivity : AppCompatActivity() {
         val enabled = isDeveloperOptionsEnabled(this)
         findViewById<TextView>(R.id.titleText).text =
             coloredAnnotations(if (enabled) R.string.enabled_title else R.string.disabled_title)
-        findViewById<TextView>(R.id.messageText).apply {
-            if (enabled) {
-                gravity = Gravity.CENTER
-                setLineSpacing(0f, 0f)
-                text = getText(R.string.enabled_message)
-            } else {
-                gravity = Gravity.START
-                setLineSpacing(0f, 1.35f)
-                text = disabledSteps()
-            }
+
+        val message = findViewById<TextView>(R.id.messageText)
+        val steps = findViewById<LinearLayout>(R.id.stepsContainer)
+        if (enabled) {
+            message.text = getText(R.string.enabled_message)
+            message.visibility = TextView.VISIBLE
+            steps.visibility = LinearLayout.GONE
+        } else {
+            message.visibility = TextView.GONE
+            steps.visibility = LinearLayout.VISIBLE
+            populateSteps(steps)
         }
+
         findViewById<Button>(R.id.startButton).text =
             getText(if (enabled) R.string.open_dev_options else R.string.start)
+        applyStateVisuals(enabled)
     }
 
-    /** Numbered, OEM-tailored steps for turning Developer options on. */
-    private fun disabledSteps(): CharSequence {
+    /** Washes the screen with a faint tint keyed to the ON/OFF state. */
+    private fun applyStateVisuals(enabled: Boolean) {
+        findViewById<android.view.View>(R.id.main)
+            .setBackgroundColor(color(if (enabled) R.color.tint_on else R.color.tint_off))
+    }
+
+    /** Rebuilds the numbered, OEM-tailored step cards for turning Developer options on. */
+    private fun populateSteps(container: LinearLayout) {
         val hint = devOptionsHint(this)
         val steps = listOf(
             getString(R.string.dev_options_step_open, hint.aboutPage),
             getString(R.string.dev_options_step_tap, hint.buildField),
             getString(R.string.dev_options_step_return),
         )
-        val html = steps.mapIndexed { i, step -> "${i + 1}.  $step" }.joinToString("<br/>")
-        return HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_MODE_LEGACY)
+        container.removeAllViews()
+        val inflater = LayoutInflater.from(this)
+        steps.forEachIndexed { i, step ->
+            val row = inflater.inflate(R.layout.item_step, container, false)
+            row.findViewById<TextView>(R.id.stepNumber).text = (i + 1).toString()
+            row.findViewById<TextView>(R.id.stepText).text =
+                HtmlCompat.fromHtml(step, HtmlCompat.FROM_HTML_MODE_LEGACY)
+            container.addView(row)
+        }
     }
+
+    private fun color(resId: Int) = ContextCompat.getColor(this, resId)
 
     /** Turns each <annotation color="error|success"> span into a theme-aware colored span. */
     private fun coloredAnnotations(resId: Int): CharSequence {

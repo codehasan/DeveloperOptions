@@ -5,4 +5,10 @@
     <color name="text_subtitle">#5F6368</color>
     <color name="text_error">#D93025</color>
     <color name="text_success">#1E8E3E</color>
+
+    <color name="on_accent">#FFFFFF</color>
+    <color name="surface_card">#F1F3F4</color>
+    <!-- Faint whole-screen wash keyed to the ON/OFF state. -->
+    <color name="tint_on">#F1FBF3</color>
+    <color name="tint_off">#FDF6F5</color>
 </resources>
