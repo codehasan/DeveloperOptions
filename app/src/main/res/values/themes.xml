@@ -16,7 +16,7 @@
         <item name="android:windowNoTitle">true</item>
     </style>
 
-    <style name="TextStyle.Bold">
+    <style name="BoldText">
         <item name="android:fontFamily">@font/product_sans_medium</item>
         <item name="fontFamily">@font/product_sans_medium</item>
     </style>

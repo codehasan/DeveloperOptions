@@ -23,7 +23,7 @@
 
             <TextView
                 android:id="@+id/titleText"
-                style="@style/TextStyle.Bold"
+                style="@style/BoldText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
