@@ -21,9 +21,9 @@ No permissions, no network, no analytics.
 ## Screenshots
 
 <p align="center">
-  <img src="images/Screenshot_1.png" alt="Screenshot 1" width="260">
-  <img src="images/Screenshot_2.png" alt="Screenshot 2" width="260">
-  <img src="images/Screenshot_3.png" alt="Screenshot 3" width="260">
+  <img src="images/Screenshot_01.jpg" alt="Screenshot 1" width="260">
+  <img src="images/Screenshot_02.jpg" alt="Screenshot 2" width="260">
+  <img src="images/Screenshot_03.jpg" alt="Screenshot 3" width="260">
 </p>
 
 <p align="center">
