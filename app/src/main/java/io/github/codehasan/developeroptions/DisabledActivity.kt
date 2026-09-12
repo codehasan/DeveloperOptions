@@ -57,9 +57,11 @@ class DisabledActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.messageText).apply {
             if (enabled) {
                 gravity = Gravity.CENTER
+                setLineSpacing(0f, 0f)
                 text = getText(R.string.enabled_message)
             } else {
                 gravity = Gravity.START
+                setLineSpacing(0f, 1.35f)
                 text = disabledSteps()
             }
         }
