@@ -30,7 +30,9 @@
             android:layout_marginTop="16dp"
             android:layout_marginBottom="20dp"
             android:textColor="@color/text_subtitle"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            tools:gravity="center"
+            tools:text="@string/enabled_message" />
 
         <Button
             android:id="@+id/startButton"
